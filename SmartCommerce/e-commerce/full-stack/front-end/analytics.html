@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketFlow | Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #facc15);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            background: none;
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .user-badge {
+            background: var(--gray-100);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-badge i {
+            color: var(--primary);
+        }
+
+        .btn-back {
+            background: var(--gray-100);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            color: var(--gray-700);
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: var(--gray-200);
+            transform: translateY(-2px);
+        }
+
+        .btn-logout {
+            background: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Cards de estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-800);
+        }
+
+        .stat-icon {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            font-size: 2.5rem;
+            color: var(--gray-200);
+            opacity: 0.5;
+        }
+
+        /* Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-700);
+        }
+
+        .chart-card h3 i {
+            color: var(--primary);
+        }
+
+        canvas {
+            max-height: 300px;
+            width: 100%;
+        }
+
+        /* Seção de exportação */
+        .export-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .export-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-export {
+            background: var(--gray-100);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-export:hover {
+            background: var(--gray-200);
+            transform: translateY(-2px);
+        }
+
+        .btn-export.json:hover {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .btn-export.csv:hover {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: var(--transition);
+            color: var(--gray-600);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Tabelas */
+        .table-container {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-search {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 40px;
+            outline: none;
+            width: 200px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fed7aa;
+            color: #9b2c1d;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-500);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--gray-200);
+            background: white;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .export-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .export-buttons {
+                justify-content: center;
+            }
+            .tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-container">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span>MarketFlow Analytics</span>
+        </div>
+        <div class="user-info">
+            <div class="user-badge">
+                <i class="fas fa-crown"></i>
+                <span id="adminName"></span>
+            </div>
+            <a href="e-commerce-frontend.html" class="btn-back">
+                <i class="fas fa-store"></i> Loja
+            </a>
+            <a href="admin.html" class="btn-back">
+                <i class="fas fa-tachometer-alt"></i> Admin
+            </a>
+            <a href="#" id="logoutAnalytics" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Cards de estatísticas -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <h3><i class="fas fa-boxes"></i> Total de Produtos</h3>
+            <div class="stat-number" id="totalProducts">-</div>
+            <div class="stat-icon"><i class="fas fa-box"></i></div>
+        </div>
+        <div class="stat-card">
+            <h3><i class="fas fa-users"></i> Total de Usuários</h3>
+            <div class="stat-number" id="totalUsers">-</div>
+            <div class="stat-icon"><i class="fas fa-user-friends"></i></div>
+        </div>
+        <div class="stat-card">
+            <h3><i class="fas fa-shopping-cart"></i> Total de Pedidos</h3>
+            <div class="stat-number" id="totalOrders">-</div>
+            <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+        </div>
+        <div class="stat-card">
+            <h3><i class="fas fa-dollar-sign"></i> Receita Total</h3>
+            <div class="stat-number" id="totalRevenue">-</div>
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-bar"></i> Produtos por Categoria</h3>
+            <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie"></i> Métodos de Pagamento</h3>
+            <canvas id="paymentChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Seção de Exportação -->
+    <div class="export-section">
+        <div class="export-title">
+            <i class="fas fa-download"></i>
+            <span>Exportar Dados</span>
+        </div>
+        <div class="export-buttons">
+            <button class="btn-export json" id="exportJSON">
+                <i class="fas fa-file-code"></i> Exportar JSON
+            </button>
+            <button class="btn-export csv" id="exportCSV">
+                <i class="fas fa-file-excel"></i> Exportar CSV
+            </button>
+            <button class="btn-export" id="exportAllCSV">
+                <i class="fas fa-database"></i> Exportar Tudo (ZIP)
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabelas com abas -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="products">
+            <i class="fas fa-box"></i> Produtos
+        </button>
+        <button class="tab-btn" data-tab="users">
+            <i class="fas fa-users"></i> Usuários
+        </button>
+        <button class="tab-btn" data-tab="orders">
+            <i class="fas fa-shopping-cart"></i> Pedidos
+        </button>
+    </div>
+
+    <!-- Tabela de Produtos -->
+    <div class="table-container" id="productsTable">
+        <div class="table-header">
+            <span><i class="fas fa-box"></i> Lista de Produtos</span>
+            <input type="text" id="searchProducts" class="table-search" placeholder="🔍 Buscar produto...">
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Preço</th>
+                        <th>Categoria</th>
+                        <th>Avaliação</th>
+                        <th>Frete Grátis</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tabela de Usuários -->
+    <div class="table-container" id="usersTable" style="display:none;">
+        <div class="table-header">
+            <span><i class="fas fa-users"></i> Lista de Usuários</span>
+            <input type="text" id="searchUsers" class="table-search" placeholder="🔍 Buscar usuário...">
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Data de Cadastro</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="3" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tabela de Pedidos -->
+    <div class="table-container" id="ordersTable" style="display:none;">
+        <div class="table-header">
+            <span><i class="fas fa-shopping-cart"></i> Histórico de Pedidos</span>
+            <input type="text" id="searchOrders" class="table-search" placeholder="🔍 Buscar pedido...">
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Data</th>
+                        <th>Total</th>
+                        <th>Pagamento</th>
+                        <th>Itens</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>📊 MarketFlow Analytics Dashboard &copy; 2025 | Dados em tempo real</p>
+    <p style="font-size: 0.7rem; margin-top: 0.5rem;">Análise avançada para tomada de decisão</p>
+</footer>
+
+<script>
+    const API_URL = "http://127.0.0.1:5000";
+    let analyticsData = null;
+    let categoryChart = null;
+    let paymentChart = null;
+    let productsSearch = "";
+    let usersSearch = "";
+    let ordersSearch = "";
+
+    // Verificar autenticação
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (!token || !user) {
+        window.location.href = "login.html";
+    }
+
+    // Verificar se é admin
+    if (user !== "admin") {
+        alert("⚠️ Acesso negado! Esta área é restrita para administradores.");
+        window.location.href = "e-commerce-frontend.html";
+    }
+
+    document.getElementById("adminName").innerHTML = `<i class="fas fa-crown"></i> ${user}`;
+
+    document.getElementById("logoutAnalytics").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    });
+
+    // Carregar dados de analytics
+    async function loadAnalytics() {
+        try {
+            const response = await fetch(`${API_URL}/admin/analytics`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                analyticsData = await response.json();
+                updateStats();
+                renderCharts();
+                renderProductsTable();
+                renderUsersTable();
+                renderOrdersTable();
+            } else if (response.status === 403) {
+                alert("Acesso negado!");
+                window.location.href = "e-commerce-frontend.html";
+            } else {
+                console.error("Erro ao carregar analytics");
+                showError();
+            }
+        } catch (error) {
+            console.error("Erro:", error);
+            showError();
+        }
+    }
+
+    function showError() {
+        const tbody = document.getElementById("productsTableBody");
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #ef4444;">❌ Erro ao carregar dados. Verifique se o servidor está rodando.</td></tr>';
+    }
+
+    function updateStats() {
+        document.getElementById("totalProducts").textContent = analyticsData.total_products;
+        document.getElementById("totalUsers").textContent = analyticsData.total_users;
+        document.getElementById("totalOrders").textContent = analyticsData.total_orders;
+        document.getElementById("totalRevenue").textContent = `R$ ${analyticsData.total_revenue.toFixed(2)}`;
+    }
+
+    function renderCharts() {
+        // Gráfico de categorias
+        const categories = {};
+        analyticsData.products.forEach(p => {
+            categories[p.category] = (categories[p.category] || 0) + 1;
+        });
+        
+        const ctx1 = document.getElementById('categoryChart').getContext('2d');
+        if (categoryChart) categoryChart.destroy();
+        categoryChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(categories).map(c => c.charAt(0).toUpperCase() + c.slice(1)),
+                datasets: [{
+                    label: 'Quantidade de Produtos',
+                    data: Object.values(categories),
+                    backgroundColor: '#f97316',
+                    borderRadius: 8,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} produtos` } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Gráfico de métodos de pagamento
+        const paymentMethods = {};
+        analyticsData.orders.forEach(o => {
+            const method = o.payment_method === 'cartao_credito' ? 'Cartão' : 
+                          o.payment_method === 'pix' ? 'PIX' : 'Boleto';
+            paymentMethods[method] = (paymentMethods[method] || 0) + 1;
+        });
+        
+        const ctx2 = document.getElementById('paymentChart').getContext('2d');
+        if (paymentChart) paymentChart.destroy();
+        paymentChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(paymentMethods),
+                datasets: [{
+                    data: Object.values(paymentMethods),
+                    backgroundColor: ['#f97316', '#10b981', '#3b82f6'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw} pedidos` } }
+                }
+            }
+        });
+    }
+
+    function renderProductsTable() {
+        const filtered = analyticsData.products.filter(p => 
+            p.name.toLowerCase().includes(productsSearch.toLowerCase()) ||
+            p.category.toLowerCase().includes(productsSearch.toLowerCase())
+        );
+        
+        const tbody = document.getElementById("productsTableBody");
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum produto encontrado</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = filtered.map(p => `
+            <tr>
+                <td>${p.id}</td>
+                <td><strong>${p.name}</strong></td>
+                <td style="color: #f97316; font-weight: 600;">R$ ${p.price.toFixed(2)}</td>
+                <td><span class="badge badge-info">${p.category}</span></td>
+                <td>${p.rating} ★</td>
+                <td><span class="badge ${p.free_shipping ? 'badge-success' : 'badge-warning'}">${p.free_shipping ? '✅ Grátis' : '❌ Pago'}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderUsersTable() {
+        const filtered = analyticsData.users.filter(u => 
+            u.username.toLowerCase().includes(usersSearch.toLowerCase())
+        );
+        
+        const tbody = document.getElementById("usersTableBody");
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum usuário encontrado</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = filtered.map(u => `
+            <tr>
+                <td>${u.id}</td>
+                <td><strong>${u.username}</strong> ${u.username === 'admin' ? '<span class="badge badge-success" style="margin-left: 8px;">Admin</span>' : ''}</td>
+                <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '-'}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderOrdersTable() {
+        const filtered = analyticsData.orders.filter(o => 
+            o.username.toLowerCase().includes(ordersSearch.toLowerCase()) ||
+            o.payment_method.toLowerCase().includes(ordersSearch.toLowerCase())
+        );
+        
+        const tbody = document.getElementById("ordersTableBody");
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum pedido encontrado</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = filtered.map(o => `
+            <tr>
+                <td>#${o.id}</td>
+                <td><strong>${o.username}</strong></td>
+                <td>${new Date(o.order_date).toLocaleString('pt-BR')}</td>
+                <td style="color: #f97316; font-weight: 700;">R$ ${o.total.toFixed(2)}</td>
+                <td><span class="badge ${o.payment_method === 'pix' ? 'badge-success' : 'badge-info'}">${o.payment_method === 'cartao_credito' ? '💳 Cartão' : o.payment_method === 'pix' ? '📱 PIX' : '📄 Boleto'}</span></td>
+                <td>${o.items_count} itens</td>
+            </tr>
+        `).join('');
+    }
+
+    // Exportar JSON completo
+    document.getElementById("exportJSON").addEventListener("click", () => {
+        const dataStr = JSON.stringify(analyticsData, null, 2);
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `marketflow_analytics_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Exportar CSV (planilha universal)
+    function arrayToCSV(arr, columns) {
+        if (!arr || !arr.length) return "";
+        const header = columns.join(",");
+        const rows = arr.map(item => columns.map(col => {
+            let value = item[col];
+            if (value === undefined || value === null) return '""';
+            if (typeof value === 'string') return `"${value.replace(/"/g, '""')}"`;
+            if (value instanceof Date) return `"${value.toISOString()}"`;
+            return value;
+        }).join(","));
+        return [header, ...rows].join("\n");
+    }
+
+    document.getElementById("exportCSV").addEventListener("click", () => {
+        const productsCSV = arrayToCSV(analyticsData.products, ["id", "name", "price", "category", "rating", "free_shipping"]);
+        const usersCSV = arrayToCSV(analyticsData.users, ["id", "username", "created_at"]);
+        const ordersCSV = arrayToCSV(analyticsData.orders, ["id", "username", "order_date", "total", "payment_method", "items_count"]);
+        
+        const content = `📊 RELATÓRIO MARKETFLOW\nGerado em: ${new Date().toLocaleString()}\n\n═══════════════════════════════════════\n📦 PRODUTOS (${analyticsData.products.length})\n═══════════════════════════════════════\n${productsCSV}\n\n═══════════════════════════════════════\n👥 USUÁRIOS (${analyticsData.users.length})\n═══════════════════════════════════════\n${usersCSV}\n\n═══════════════════════════════════════\n🛒 PEDIDOS (${analyticsData.orders.length})\n═══════════════════════════════════════\n${ordersCSV}\n\n═══════════════════════════════════════\n📈 RESUMO\n═══════════════════════════════════════\nTotal Produtos: ${analyticsData.total_products}\nTotal Usuários: ${analyticsData.total_users}\nTotal Pedidos: ${analyticsData.total_orders}\nReceita Total: R$ ${analyticsData.total_revenue.toFixed(2)}`;
+        
+        const blob = new Blob([content], {type: "text/csv;charset=utf-8;"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `marketflow_report_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("exportAllCSV").addEventListener("click", () => {
+        const productsCSV = arrayToCSV(analyticsData.products, ["id", "name", "price", "category", "rating", "free_shipping"]);
+        const usersCSV = arrayToCSV(analyticsData.users, ["id", "username", "created_at"]);
+        const ordersCSV = arrayToCSV(analyticsData.orders, ["id", "username", "order_date", "total", "payment_method", "items_count"]);
+        
+        // Criar arquivo ZIP simulado com múltiplos CSVs
+        const content = `marketflow_products.csv\n${productsCSV}\n\nmarketflow_users.csv\n${usersCSV}\n\nmarketflow_orders.csv\n${ordersCSV}`;
+        const blob = new Blob([content], {type: "text/plain"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `marketflow_all_data_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Buscas
+    document.getElementById("searchProducts").addEventListener("input", (e) => {
+        productsSearch = e.target.value;
+        renderProductsTable();
+    });
+    
+    document.getElementById("searchUsers").addEventListener("input", (e) => {
+        usersSearch = e.target.value;
+        renderUsersTable();
+    });
+    
+    document.getElementById("searchOrders").addEventListener("input", (e) => {
+        ordersSearch = e.target.value;
+        renderOrdersTable();
+    });
+
+    // Abas
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const tab = btn.dataset.tab;
+            document.getElementById("productsTable").style.display = tab === "products" ? "block" : "none";
+            document.getElementById("usersTable").style.display = tab === "users" ? "block" : "none";
+            document.getElementById("ordersTable").style.display = tab === "orders" ? "block" : "none";
+        });
+    });
+
+    // Inicializar
+    loadAnalytics();
+</script>
+</body>
+</html>

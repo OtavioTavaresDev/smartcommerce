@@ -1,0 +1,16 @@
+flask
+flask-cors
+sqlalchemy
+pyjwt
+passlib[bcrypt]
+PyJWT 
+flask-cors
+flask-jwt-extended
+sqlalchemy 
+pyjwt 
+werkzeug
+flask
+flask-cors
+sqlalchemy
+pyjwt
+werkzeug

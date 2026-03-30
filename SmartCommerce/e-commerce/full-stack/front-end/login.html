@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MarketFlow | Autenticação</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .auth-container {
+            max-width: 460px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #f97316, #facc15);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .auth-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .auth-form {
+            padding: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 2.5rem;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.85rem 0;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        .forgot-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .forgot-link a {
+            color: #f97316;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .forgot-link a:hover {
+            text-decoration: underline;
+            color: #ea580c;
+        }
+
+        .message-area {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .message-success {
+            background: #e6f7e6;
+            color: #2e7d32;
+        }
+
+        .message-error {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .message-info {
+            background: #e6f0ff;
+            color: #1e40af;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-header">
+        <div class="logo">
+            <i class="fas fa-store"></i> MarketFlow
+        </div>
+        <h2>Bem-vindo de volta!</h2>
+        <p>Entre para explorar ofertas exclusivas</p>
+    </div>
+
+    <div class="auth-form">
+        <div id="messageBox" class="message-area hidden"></div>
+
+        <div class="input-group">
+            <label>Usuário</label>
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" id="username" placeholder="admin ou demo" autocomplete="username">
+        </div>
+        <div class="input-group">
+            <label>Senha</label>
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" placeholder="••••" autocomplete="current-password">
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-primary" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+            <button class="btn btn-secondary" id="registerBtn">
+                <i class="fas fa-user-plus"></i> Cadastrar
+            </button>
+        </div>
+        
+        <div class="forgot-link">
+            <a href="forgot_password.html" id="forgotPasswordLink">
+                <i class="fas fa-key"></i> Esqueceu a senha?
+            </a>
+        </div>
+    </div>
+    <footer>
+        <i class="fas fa-shield-alt"></i> Ambiente seguro | Sistema de recuperação de senha
+    </footer>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:5000";
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const messageBox = document.getElementById("messageBox");
+
+    function showMessage(text, type) {
+        messageBox.textContent = text;
+        messageBox.className = "message-area";
+        if (type === "success") messageBox.classList.add("message-success");
+        else if (type === "error") messageBox.classList.add("message-error");
+        else messageBox.classList.add("message-info");
+        messageBox.classList.remove("hidden");
+        
+        setTimeout(() => {
+            messageBox.classList.add("hidden");
+        }, 5000);
+    }
+
+    async function handleLogin() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!username || !password) {
+            showMessage("Preencha todos os campos", "error");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username: username, password: password})
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", data.user);
+                showMessage("Login realizado com sucesso!", "success");
+                
+                setTimeout(() => {
+                    window.location.href = "e-commerce-frontend.html";
+                }, 1000);
+            } else {
+                showMessage(data.error || "Erro no login", "error");
+            }
+        } catch (error) {
+            console.error("Erro:", error);
+            showMessage("Erro de conexão com o servidor", "error");
+        }
+    }
+
+    async function handleRegister() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!username || !password) {
+            showMessage("Preencha todos os campos", "error");
+            return;
+        }
+
+        if (password.length < 4) {
+            showMessage("A senha deve ter pelo menos 4 caracteres", "error");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/register`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username: username, password: password})
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage("Usuário criado com sucesso! Agora faça login.", "success");
+                usernameInput.value = "";
+                passwordInput.value = "";
+            } else {
+                showMessage(data.error || "Erro ao cadastrar", "error");
+            }
+        } catch (error) {
+            console.error("Erro:", error);
+            showMessage("Erro de conexão com o servidor", "error");
+        }
+    }
+
+    loginBtn.addEventListener("click", handleLogin);
+    registerBtn.addEventListener("click", handleRegister);
+    
+    passwordInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleLogin();
+    });
+</script>
+</body>
+</html> 
